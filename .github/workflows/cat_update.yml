@@ -1,0 +1,43 @@
+name: Update Cat Photo 🐱
+
+# 언제 실행할까요?
+on:
+  schedule:
+    - cron: '0 0 * * *'  # 매일 자정 (UTC 기준) -> 한국 시간 아침 9시
+  workflow_dispatch:     # 수동 실행 버튼 (테스트용)
+
+permissions:
+  contents: write        # 깃허브 봇이 리포지토리에 글을 쓸 권한 부여
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. 내 코드 내려받기
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # 2. 파이썬 설치하기
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    # 3. 필요한 라이브러리 설치 (requests)
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+
+    # 4. 파이썬 스크립트 실행 (README 수정됨)
+    - name: Run update script
+      run: python update_cat.py
+
+    # 5. 변경된 내용 저장하고 깃허브에 올리기
+    - name: Commit and Push changes
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git add README.md
+        git commit -m "🐱 Update random cat image" || echo "변경된 내용이 없어서 커밋하지 않음"
+        git push
